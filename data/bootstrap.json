@@ -1,0 +1,85 @@
+{
+  "app_title": "ColdGrid Structural Intelligence Demo",
+  "default_scenario_id": "fault5",
+  "asset_url": "./assets/Final_Final_Gemini_Generated_Image_pj3apopj3apopj3a%20%281%29.png",
+  "scenarios": [
+    {
+      "scenario_id": "fault6",
+      "display_name": "Fault 6 - MT evaporator air path blockage",
+      "root_cause": "MT evaporator air path blockage",
+      "root_confidence": "medium",
+      "si_warning_minute": 257,
+      "si_warning_clock": "04:17",
+      "conventional_detection_minute": 1214,
+      "conventional_detection_clock": "20:14",
+      "lead_vs_conventional": 957,
+      "claim_copy": "SI flagged early structural stress 15.9 hours before the conventional symptom became obvious and localized the root node to mt evaporator air path blockage.",
+      "strongest_signal": "cond_stress_proxy"
+    },
+    {
+      "scenario_id": "fault4",
+      "display_name": "Fault 4 - MT evaporator fan failure",
+      "root_cause": "MT evaporator fan",
+      "root_confidence": "high",
+      "si_warning_minute": 229,
+      "si_warning_clock": "03:49",
+      "conventional_detection_minute": 1165,
+      "conventional_detection_clock": "19:25",
+      "lead_vs_conventional": 936,
+      "claim_copy": "SI flagged early structural stress 15.6 hours before the conventional symptom became obvious and localized the root node to mt evaporator fan.",
+      "strongest_signal": "cond_stress_proxy"
+    },
+    {
+      "scenario_id": "fault5",
+      "display_name": "Fault 5 - Condenser air path blockage",
+      "root_cause": "Condenser / gas cooler blockage",
+      "root_confidence": "high",
+      "si_warning_minute": 193,
+      "si_warning_clock": "03:13",
+      "conventional_detection_minute": 795,
+      "conventional_detection_clock": "13:15",
+      "lead_vs_conventional": 602,
+      "claim_copy": "SI flagged condenser temperature rise 10.0 hours before the conventional symptom became obvious and localized the root node to condenser / gas cooler blockage.",
+      "strongest_signal": "cond_stress_proxy"
+    },
+    {
+      "scenario_id": "fault1",
+      "display_name": "Fault 1 - LT display case door open",
+      "root_cause": "LT door / infiltration",
+      "root_confidence": "medium",
+      "si_warning_minute": 367,
+      "si_warning_clock": "06:07",
+      "conventional_detection_minute": 851,
+      "conventional_detection_clock": "14:11",
+      "lead_vs_conventional": 484,
+      "claim_copy": "SI flagged early structural stress 8.1 hours before the conventional symptom became obvious and localized the root node to lt door / infiltration.",
+      "strongest_signal": "cond_stress_proxy"
+    },
+    {
+      "scenario_id": "fault2",
+      "display_name": "Fault 2 - LT evaporator ice accumulation",
+      "root_cause": "LT evaporator icing",
+      "root_confidence": "medium",
+      "si_warning_minute": 727,
+      "si_warning_clock": "12:07",
+      "conventional_detection_minute": 803,
+      "conventional_detection_clock": "13:23",
+      "lead_vs_conventional": 76,
+      "claim_copy": "SI flagged early structural stress 76 minutes before the conventional symptom became obvious and localized the root node to lt evaporator icing.",
+      "strongest_signal": "cond_stress_proxy"
+    },
+    {
+      "scenario_id": "fault3",
+      "display_name": "Fault 3 - LT evaporator valve failure",
+      "root_cause": "LT expansion valve / refrigerant feed",
+      "root_confidence": "high",
+      "si_warning_minute": 836,
+      "si_warning_clock": "13:56",
+      "conventional_detection_minute": 851,
+      "conventional_detection_clock": "14:11",
+      "lead_vs_conventional": 15,
+      "claim_copy": "SI flagged early structural stress 15 minutes before the conventional symptom became obvious and localized the root node to lt expansion valve / refrigerant feed.",
+      "strongest_signal": "grid_spread"
+    }
+  ]
+}

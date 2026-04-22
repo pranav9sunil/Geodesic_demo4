@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdGrid Structural Intelligence Demo</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg: #050b14;
+    --bg-2: #08111f;
+    --card: #0a1220;
+    --card-2: #0c1728;
+    --border: #172842;
+    --border-strong: #22456c;
+    --text: #dde9f7;
+    --muted: #6d86a3;
+    --accent: #68dfff;
+    --accent-2: #2ca7ff;
+    --green: #38d15d;
+    --amber: #ffb020;
+    --red: #ff5e67;
+    --blue: #4d82ff;
+    --shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+  }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background:
+      radial-gradient(circle at top, rgba(77, 130, 255, 0.08), transparent 24%),
+      linear-gradient(180deg, #030812 0%, #07111c 45%, #040913 100%);
+    color: var(--text);
+    font-family: "SF Mono", "IBM Plex Mono", "Fira Code", monospace;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-size: 12px;
+  }
+
+  .app-shell {
+    width: min(1680px, calc(100vw - 20px));
+    margin: 8px auto 16px;
+  }
+
+  .topbar,
+  .subbar,
+  .detection-ribbon,
+  .mini-card,
+  .panel,
+  .window-card {
+    background: linear-gradient(180deg, rgba(8, 15, 28, 0.98), rgba(7, 13, 24, 0.96));
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 14px;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .topbar-left,
+  .nav-tabs,
+  .control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .branding {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+
+  .framework {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .nav-tabs {
+    margin-left: 18px;
+    gap: 8px;
+  }
+
+  .nav-tab {
+    border: 1px solid transparent;
+    border-radius: 12px 12px 0 0;
+    padding: 8px 14px;
+    font: inherit;
+    color: var(--muted);
+    background: transparent;
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  }
+
+  .nav-tab.active {
+    color: var(--accent-2);
+    border-color: var(--border-strong);
+    background: rgba(28, 57, 92, 0.26);
+    box-shadow: inset 0 -2px 0 var(--accent-2);
+  }
+
+  .status-line {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background: var(--green);
+    box-shadow: 0 0 12px rgba(56, 209, 93, 0.7);
+  }
+
+  .subbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 14px;
+    border-top: 0;
+  }
+
+  .subbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .scenario-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .scenario-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .health-pill,
+  .status-pill,
+  .control-chip,
+  .benchmark-chip,
+  .mini-badge,
+  .timeline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: rgba(12, 23, 40, 0.9);
+  }
+
+  .health-pill strong {
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .status-pill.healthy { color: var(--green); border-color: rgba(56, 209, 93, 0.35); }
+  .status-pill.warning { color: var(--amber); border-color: rgba(255, 176, 32, 0.35); }
+  .status-pill.critical { color: var(--red); border-color: rgba(255, 94, 103, 0.35); }
+
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .select-shell,
+  .btn {
+    font: inherit;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(180deg, rgba(12, 23, 40, 0.98), rgba(9, 18, 32, 0.96));
+    color: var(--text);
+  }
+
+  .select-shell {
+    min-width: 310px;
+    padding: 7px 10px;
+  }
+
+  .btn {
+    padding: 8px 11px;
+    cursor: pointer;
+    transition: border-color 120ms ease, transform 120ms ease;
+  }
+
+  .btn:hover {
+    border-color: rgba(104, 223, 255, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn.secondary {
+    color: var(--amber);
+    border-color: rgba(255, 176, 32, 0.28);
+  }
+
+  .detection-ribbon {
+    margin-top: 8px;
+    border-radius: 0 0 18px 18px;
+    overflow: hidden;
+  }
+
+  .detection-track {
+    position: relative;
+    height: 32px;
+    background: #08111d;
+  }
+
+  .detection-segment {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .detection-segment.green {
+    background: linear-gradient(90deg, rgba(56, 209, 93, 0.2), rgba(56, 209, 93, 0.78));
+    color: #0b180f;
+  }
+
+  .detection-segment.amber {
+    background: linear-gradient(90deg, rgba(255, 176, 32, 0.85), rgba(255, 176, 32, 0.22));
+    color: #261602;
+    justify-content: space-between;
+  }
+
+  .detection-marker {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: rgba(221, 233, 247, 0.88);
+    box-shadow: 0 0 12px rgba(221, 233, 247, 0.45);
+  }
+
+  .detection-caret {
+    position: absolute;
+    top: 4px;
+    transform: translateX(-50%);
+    color: var(--accent);
+    font-size: 14px;
+    line-height: 1;
+    text-shadow: 0 0 10px rgba(104, 223, 255, 0.6);
+  }
+
+  .mini-card {
+    border-radius: 16px;
+    padding: 8px 10px;
+    min-height: 64px;
+  }
+
+  .mini-label {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .mini-value {
+    margin-top: 6px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .mini-value.green { color: var(--green); }
+  .mini-value.amber { color: var(--amber); }
+  .mini-value.red { color: var(--red); }
+  .mini-value.white { color: var(--text); }
+
+  .mini-note {
+    margin-top: 5px;
+    color: #8da4bf;
+    font-size: 9px;
+    line-height: 1.28;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .view {
+    display: none;
+    margin-top: 10px;
+  }
+
+  .view.active {
+    display: block;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    grid-template-areas:
+      "panel2 panel1"
+      "panel2 panel3"
+      "panel2 panel4";
+    gap: 10px;
+    align-items: start;
+  }
+
+  .panel {
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .panel.panel-1 { grid-area: panel1; }
+  .panel.panel-2 { grid-area: panel2; }
+  .panel.panel-3 { grid-area: panel3; }
+  .panel.panel-4 { grid-area: panel4; }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(11, 20, 35, 0.98), rgba(9, 17, 30, 0.96));
+  }
+
+  .panel-title {
+    color: var(--text);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .panel-title strong {
+    color: var(--accent);
+  }
+
+  .panel-body {
+    padding: 12px;
+  }
+
+  .panel-1 .panel-body {
+    display: grid;
+    gap: 12px;
+  }
+
+  .health-topline {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .health-gauge {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-2);
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at center, rgba(17, 34, 58, 0.95), rgba(9, 15, 26, 0.98));
+    box-shadow: inset 0 0 18px rgba(104, 223, 255, 0.08), 0 0 20px rgba(44, 167, 255, 0.18);
+  }
+
+  .health-gauge strong {
+    font-size: 22px;
+    color: var(--accent);
+  }
+
+  .health-gauge span {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .metric-box {
+    border: 1px solid rgba(34, 69, 108, 0.48);
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(10, 18, 32, 0.75);
+  }
+
+  .metric-box .label {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .metric-box .value {
+    margin-top: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .chart-shell,
+  .explain-chart-shell {
+    border: 1px solid rgba(23, 40, 66, 0.92);
+    border-radius: 14px;
+    background: rgba(6, 12, 21, 0.88);
+    overflow: hidden;
+  }
+
+  .chart-shell svg,
+  .explain-chart-shell svg {
+    display: block;
+    width: 100%;
+  }
+
+  .chart-shell svg {
+    height: 170px;
+  }
+
+  .legend-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  .panel-2 .panel-body {
+    padding: 0;
+    display: grid;
+  }
+
+  .panel2-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 312px;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .visual-column {
+    display: grid;
+    align-content: start;
+  }
+
+  .findings-rail {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 10px;
+    border-left: 1px solid var(--border);
+    background: rgba(7, 13, 24, 0.84);
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .findings-rail .mini-card {
+    min-height: 60px;
+    border-radius: 14px;
+  }
+
+  .overlay-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .overlay-title-stack {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .overlay-title-stack strong {
+    color: var(--accent);
+    font-size: 15px;
+  }
+
+  .overlay-title-stack span {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .overlay-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1920 / 1504;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(5, 10, 18, 0.96), rgba(4, 8, 14, 0.98));
+  }
+
+  .overlay-stage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .overlay-mask,
+  .grid-layer,
+  .zone-layer,
+  .marker-layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .overlay-mask {
+    pointer-events: none;
+  }
+
+  .overlay-mask::after {
+    content: "";
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    width: 170px;
+    height: 170px;
+    background: radial-gradient(circle at center, rgba(7, 17, 29, 0.98) 0%, rgba(7, 17, 29, 0.94) 42%, rgba(7, 17, 29, 0) 72%);
+  }
+
+  .zone-box {
+    position: absolute;
+    border: 1px solid rgba(255, 176, 32, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 176, 32, 0.03);
+    pointer-events: none;
+  }
+
+  .zone-box.root {
+    border-color: rgba(255, 176, 32, 0.55);
+    box-shadow: 0 0 28px rgba(255, 176, 32, 0.2);
+  }
+
+  .zone-box.active {
+    border-color: rgba(104, 223, 255, 0.65);
+    background: rgba(104, 223, 255, 0.07);
+    box-shadow: 0 0 24px rgba(104, 223, 255, 0.18);
+  }
+
+  .grid-cell {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    pointer-events: none;
+  }
+
+  .sensor-marker {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255, 255, 255, 0.82);
+    background: rgba(104, 223, 255, 0.28);
+    box-shadow: 0 0 14px rgba(104, 223, 255, 0.35);
+    cursor: pointer;
+    opacity: 0.78;
+  }
+
+  .sensor-marker.active {
+    width: 15px;
+    height: 15px;
+    background: rgba(255, 176, 32, 0.4);
+    box-shadow: 0 0 22px rgba(255, 176, 32, 0.48);
+    opacity: 1;
+  }
+
+  .sensor-focus {
+    width: min(520px, 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(104, 223, 255, 0.36);
+    background: rgba(8, 16, 29, 0.92);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  .sensor-focus-main {
+    min-width: 0;
+  }
+
+  .sensor-focus .label {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .sensor-focus .name {
+    margin-top: 3px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .sensor-focus .meta {
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .sensor-focus .hint {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1.35;
+    text-align: right;
+  }
+
+  .overlay-footer {
+    display: grid;
+    gap: 10px;
+    padding: 10px 12px 12px;
+  }
+
+  .timeline-strip {
+    position: relative;
+    height: 56px;
+    border: 1px solid rgba(23, 40, 66, 0.96);
+    border-radius: 12px;
+    background: rgba(5, 10, 19, 0.92);
+    overflow: hidden;
+  }
+
+  .timeline-line {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 28px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(44, 167, 255, 0.18), rgba(104, 223, 255, 0.3), rgba(255, 176, 32, 0.38), rgba(255, 94, 103, 0.4));
+  }
+
+  .timeline-event,
+  .timeline-current {
+    position: absolute;
+    top: 8px;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.2;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .timeline-event::before,
+  .timeline-current::before {
+    content: "";
+    display: block;
+    margin: 0 auto 4px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.72);
+    background: var(--card);
+  }
+
+  .timeline-event.si::before { background: var(--green); border-color: rgba(56, 209, 93, 0.6); }
+  .timeline-event.conv::before { background: var(--amber); border-color: rgba(255, 176, 32, 0.58); }
+  .timeline-event.escalation::before { background: var(--red); border-color: rgba(255, 94, 103, 0.58); }
+  .timeline-event.traditional::before { background: var(--accent-2); border-color: rgba(44, 167, 255, 0.56); }
+  .timeline-current::before { background: var(--accent); border-color: rgba(104, 223, 255, 0.68); }
+
+  .slider-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .slider-shell input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+
+  .time-label {
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .panel-3 .panel-body,
+  .panel-4 .panel-body {
+    display: grid;
+    gap: 12px;
+  }
+
+  .signal-bars,
+  .corridor-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .signal-row,
+  .corridor-row {
+    display: grid;
+    gap: 4px;
+  }
+
+  .signal-top,
+  .corridor-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    font-size: 10px;
+  }
+
+  .signal-track,
+  .corridor-track {
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(16, 28, 46, 0.96);
+    overflow: hidden;
+  }
+
+  .signal-fill,
+  .corridor-fill {
+    height: 100%;
+    border-radius: 999px;
+  }
+
+  .sev-normal { background: linear-gradient(90deg, rgba(77, 130, 255, 0.8), rgba(104, 223, 255, 0.72)); }
+  .sev-elevated { background: linear-gradient(90deg, rgba(255, 176, 32, 0.82), rgba(255, 199, 87, 0.72)); }
+  .sev-anomaly { background: linear-gradient(90deg, rgba(255, 94, 103, 0.86), rgba(255, 133, 103, 0.78)); }
+
+  .corridor-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .window-card {
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .window-title {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .explain-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: 10px;
+  }
+
+  .audit-feed,
+  .evidence-stack {
+    display: grid;
+    gap: 10px;
+  }
+
+  .audit-card {
+    border: 1px solid rgba(23, 40, 66, 0.92);
+    border-radius: 14px;
+    padding: 12px;
+    background: rgba(8, 16, 29, 0.9);
+    cursor: pointer;
+    transition: border-color 120ms ease, transform 120ms ease;
+  }
+
+  .audit-card:hover,
+  .audit-card.active {
+    border-color: rgba(104, 223, 255, 0.54);
+    transform: translateY(-1px);
+  }
+
+  .mini-badge.healthy {
+    color: var(--green);
+    border-color: rgba(56, 209, 93, 0.32);
+  }
+
+  .mini-badge.warning {
+    color: var(--amber);
+    border-color: rgba(255, 176, 32, 0.32);
+  }
+
+  .mini-badge.critical {
+    color: var(--red);
+    border-color: rgba(255, 94, 103, 0.34);
+  }
+
+  .audit-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .audit-time {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .audit-lead {
+    color: var(--green);
+  }
+
+  .audit-card p {
+    margin: 0;
+    color: #c6d6e8;
+    font-size: 11px;
+    line-height: 1.55;
+  }
+
+  .audit-meta {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .focus-card,
+  .evidence-card {
+    border: 1px solid rgba(23, 40, 66, 0.92);
+    border-radius: 16px;
+    padding: 14px;
+    background: rgba(7, 14, 25, 0.9);
+  }
+
+  .focus-card h3,
+  .evidence-card h3 {
+    margin: 0 0 10px;
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .focus-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .explain-chart-shell svg {
+    height: 220px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 11px;
+  }
+
+  th, td {
+    padding: 8px 6px;
+    border-bottom: 1px solid rgba(23, 40, 66, 0.84);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .footnote {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+  }
+
+  .empty-state {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--muted);
+    border: 1px dashed rgba(34, 69, 108, 0.6);
+    border-radius: 16px;
+    background: rgba(8, 15, 28, 0.72);
+  }
+
+  @media (max-width: 1320px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "panel2"
+        "panel1"
+        "panel3"
+        "panel4";
+    }
+    .panel2-layout {
+      grid-template-columns: 1fr;
+    }
+    .findings-rail {
+      border-left: 0;
+      border-top: 1px solid var(--border);
+      max-height: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .explain-layout { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 960px) {
+    .topbar,
+    .subbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .topbar-left,
+    .subbar-left,
+    .control-row {
+      flex-wrap: wrap;
+    }
+    .focus-grid,
+    .metric-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .slider-row {
+      grid-template-columns: 1fr;
+    }
+    .sensor-focus {
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .sensor-focus .hint {
+      text-align: left;
+    }
+    .findings-rail {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="branding">
+        <div class="logo" id="appTitle">ColdGrid Structural Intelligence Demo</div>
+        <div class="framework">Single-unit Structural Intelligence early warning demo</div>
+      </div>
+      <div class="nav-tabs">
+        <button class="nav-tab active" id="navDashboard" data-view="dashboard">Dashboard</button>
+        <button class="nav-tab" id="navExplainability" data-view="explainability">Explainability</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="subbar">
+    <div class="subbar-left">
+      <div class="scenario-title" id="scenarioTitle">Fault Scenario</div>
+      <div class="scenario-meta">
+        <div class="health-pill">Health <strong id="subbarHealth">--</strong></div>
+        <div class="status-pill healthy" id="subbarStatus">Healthy</div>
+        <div class="control-chip" id="rootNodeChip">Root: --</div>
+      </div>
+    </div>
+    <div class="control-row">
+      <label class="control">
+        <span>Scenario</span>
+        <select class="select-shell" id="scenarioSelect"></select>
+      </label>
+      <button class="btn" id="playToggle">Pause autoplay</button>
+      <button class="btn secondary" id="jumpExplainability">Explain →</button>
+    </div>
+  </div>
+
+  <div class="detection-ribbon">
+    <div class="detection-track" id="detectionTrack"></div>
+  </div>
+
+  <main class="view active" id="dashboardView">
+    <div class="dashboard-grid">
+      <section class="panel panel-1">
+        <div class="panel-header">
+          <div class="panel-title"><strong>Panel 1</strong> · Structural Health</div>
+          <div class="mini-badge" id="panel1Badge">SHI</div>
+        </div>
+        <div class="panel-body">
+          <div class="health-topline">
+            <div class="health-gauge">
+              <div style="text-align:center;">
+                <strong id="healthGaugeValue">--</strong><br>
+                <span>SHI</span>
+              </div>
+            </div>
+            <div class="metric-grid" id="healthMetricGrid"></div>
+          </div>
+          <div class="chart-shell" id="healthChart"></div>
+          <div class="legend-row">
+            <span><span class="legend-dot" style="background:var(--green)"></span>SI warning</span>
+            <span><span class="legend-dot" style="background:var(--amber)"></span>Conventional</span>
+            <span><span class="legend-dot" style="background:var(--red)"></span>Escalation</span>
+            <span><span class="legend-dot" style="background:var(--accent)"></span>Selected time</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-2">
+        <div class="panel-header">
+          <div class="panel-title"><strong>Panel 2</strong> · Refrigerator Sensor Map</div>
+          <div class="mini-badge" id="overlayPhase">Observing</div>
+        </div>
+        <div class="panel-body">
+          <div class="panel2-layout">
+            <div class="visual-column">
+              <div class="overlay-head">
+                <div class="overlay-title-stack">
+                  <strong id="overlayRootNode">--</strong>
+                  <span id="overlayRootText">Root cause</span>
+                </div>
+                <div class="overlay-title-stack">
+                  <span>Selected time</span>
+                  <strong id="overlayClock">--</strong>
+                </div>
+              </div>
+              <div class="overlay-stage" id="fridgeStage">
+                <img id="fridgeAsset" alt="Refrigerator cutaway">
+                <div class="grid-layer" id="gridLayer"></div>
+                <div class="zone-layer" id="zoneLayer"></div>
+                <div class="marker-layer" id="markerLayer"></div>
+                <div class="overlay-mask"></div>
+              </div>
+            </div>
+            <aside class="findings-rail" id="findingsRail"></aside>
+          </div>
+          <div class="overlay-footer">
+            <div class="sensor-focus" id="sensorFocus"></div>
+            <div class="timeline-strip" id="dashboardTimeline"></div>
+            <div class="slider-row">
+              <div class="control-row">
+                <button class="btn" id="prevMinute">−5 min</button>
+                <button class="btn" id="nextMinute">+5 min</button>
+              </div>
+              <div class="time-label" id="timeLabel">00:00</div>
+              <label class="slider-shell">
+                <input type="range" id="timeSlider" min="0" max="0" step="1" value="0">
+              </label>
+              <div class="control-chip" id="activeSignalBadge">Signal: --</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-3">
+        <div class="panel-header">
+          <div class="panel-title"><strong>Panel 3</strong> · Structural Divergence</div>
+          <div class="mini-badge" id="panel3Badge">Signal stack</div>
+        </div>
+        <div class="panel-body">
+          <div class="signal-bars" id="signalBars"></div>
+          <div class="legend-row">
+            <span><span class="legend-dot" style="background:var(--blue)"></span>Nominal</span>
+            <span><span class="legend-dot" style="background:var(--amber)"></span>Elevated</span>
+            <span><span class="legend-dot" style="background:var(--red)"></span>Anomaly</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-4">
+        <div class="panel-header">
+          <div class="panel-title"><strong>Panel 4</strong> · Root-Cause Corridor</div>
+          <div class="mini-badge" id="panel4Badge">Ranked path</div>
+        </div>
+        <div class="panel-body">
+          <div class="legend-row" id="benchmarkChips"></div>
+          <div class="metric-box" id="corridorSummary"></div>
+          <div class="corridor-list" id="corridorList"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <main class="view" id="explainabilityView">
+    <div class="window-card">
+      <div class="window-header">
+        <div class="window-title">Explainability Window · Timestamped Audit Trail</div>
+        <div class="control-chip" id="explainWindowMeta">Audit snapshot</div>
+      </div>
+      <div class="panel-body">
+        <div class="timeline-strip" id="explainTimeline"></div>
+        <div class="explain-layout" style="margin-top:10px;">
+          <div class="audit-feed" id="auditFeed"></div>
+          <div class="evidence-stack">
+            <div class="focus-card" id="auditFocus"></div>
+            <div class="evidence-card">
+              <h3>Evidence Snapshot</h3>
+              <div class="explain-chart-shell" id="explainChart"></div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Signal</th>
+                    <th>Fault</th>
+                    <th>Baseline</th>
+                    <th>z-score</th>
+                  </tr>
+                </thead>
+                <tbody id="evidenceTable"></tbody>
+              </table>
+              <div class="footnote" id="evidenceFootnote"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+window.__DEMO_CONFIG__ = {
+  bootstrapUrl: './data/bootstrap.json',
+  scenarioBasePath: './data/scenarios/',
+  scenarioSuffix: '.json'
+};
+</script>
+<script>
+const APP_CONFIG = Object.assign({
+  bootstrapUrl: '/api/bootstrap',
+  scenarioBasePath: '/api/scenario/',
+  scenarioSuffix: '',
+}, window.__DEMO_CONFIG__ || {});
+
+const state = {
+  bootstrap: null,
+  scenario: null,
+  scenarioId: null,
+  selectedIndex: 0,
+  activeSignalId: null,
+  activeAuditIndex: 0,
+  activeView: 'dashboard',
+  playing: true,
+  timer: null,
+};
+
+const dom = {
+  appTitle: document.getElementById('appTitle'),
+  navDashboard: document.getElementById('navDashboard'),
+  navExplainability: document.getElementById('navExplainability'),
+  dashboardView: document.getElementById('dashboardView'),
+  explainabilityView: document.getElementById('explainabilityView'),
+  scenarioSelect: document.getElementById('scenarioSelect'),
+  playToggle: document.getElementById('playToggle'),
+  jumpExplainability: document.getElementById('jumpExplainability'),
+  scenarioTitle: document.getElementById('scenarioTitle'),
+  subbarHealth: document.getElementById('subbarHealth'),
+  subbarStatus: document.getElementById('subbarStatus'),
+  rootNodeChip: document.getElementById('rootNodeChip'),
+  detectionTrack: document.getElementById('detectionTrack'),
+  panel1Badge: document.getElementById('panel1Badge'),
+  healthGaugeValue: document.getElementById('healthGaugeValue'),
+  healthMetricGrid: document.getElementById('healthMetricGrid'),
+  healthChart: document.getElementById('healthChart'),
+  overlayPhase: document.getElementById('overlayPhase'),
+  overlayRootNode: document.getElementById('overlayRootNode'),
+  overlayRootText: document.getElementById('overlayRootText'),
+  overlayClock: document.getElementById('overlayClock'),
+  findingsRail: document.getElementById('findingsRail'),
+  fridgeStage: document.getElementById('fridgeStage'),
+  fridgeAsset: document.getElementById('fridgeAsset'),
+  gridLayer: document.getElementById('gridLayer'),
+  zoneLayer: document.getElementById('zoneLayer'),
+  markerLayer: document.getElementById('markerLayer'),
+  sensorFocus: document.getElementById('sensorFocus'),
+  dashboardTimeline: document.getElementById('dashboardTimeline'),
+  prevMinute: document.getElementById('prevMinute'),
+  nextMinute: document.getElementById('nextMinute'),
+  timeLabel: document.getElementById('timeLabel'),
+  timeSlider: document.getElementById('timeSlider'),
+  activeSignalBadge: document.getElementById('activeSignalBadge'),
+  panel3Badge: document.getElementById('panel3Badge'),
+  signalBars: document.getElementById('signalBars'),
+  panel4Badge: document.getElementById('panel4Badge'),
+  benchmarkChips: document.getElementById('benchmarkChips'),
+  corridorSummary: document.getElementById('corridorSummary'),
+  corridorList: document.getElementById('corridorList'),
+  explainWindowMeta: document.getElementById('explainWindowMeta'),
+  explainTimeline: document.getElementById('explainTimeline'),
+  auditFeed: document.getElementById('auditFeed'),
+  auditFocus: document.getElementById('auditFocus'),
+  explainChart: document.getElementById('explainChart'),
+  evidenceTable: document.getElementById('evidenceTable'),
+  evidenceFootnote: document.getElementById('evidenceFootnote'),
+};
+
+function fetchJson(url) {
+  return fetch(url).then((response) => {
+    if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+    return response.json();
+  });
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function formatMaybe(value, digits = 1) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return '--';
+  return Number(value).toFixed(digits);
+}
+
+function formatHealth(value) {
+  return `${formatMaybe((value || 0) * 100, 1)}%`;
+}
+
+function niceSignalLabel(signalId) {
+  const signal = getSignalById(signalId);
+  return signal ? signal.display_name : signalId || '--';
+}
+
+function findNearestIndex(values, target) {
+  if (!values.length) return 0;
+  let bestIndex = 0;
+  let bestDelta = Math.abs(values[0] - target);
+  values.forEach((value, index) => {
+    const delta = Math.abs(value - target);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      bestIndex = index;
+    }
+  });
+  return bestIndex;
+}
+
+function nearestAuditIndex(entries, minute) {
+  if (!entries?.length) return 0;
+  let bestIndex = 0;
+  let bestDelta = Math.abs(entries[0].timestamp_minute - minute);
+  entries.forEach((entry, index) => {
+    const delta = Math.abs(entry.timestamp_minute - minute);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      bestIndex = index;
+    }
+  });
+  return bestIndex;
+}
+
+function severityClass(absZ) {
+  if (absZ >= 2.5) return 'sev-anomaly';
+  if (absZ >= 1.5) return 'sev-elevated';
+  return 'sev-normal';
+}
+
+function statusClass(status) {
+  if (status === 'critical') return 'critical';
+  if (status === 'warning') return 'warning';
+  return 'healthy';
+}
+
+function getSignalById(signalId) {
+  return state.scenario?.signal_series?.find((item) => item.signal_id === signalId) || null;
+}
+
+function currentMinute() {
+  return state.scenario?.minutes?.[state.selectedIndex] ?? 0;
+}
+
+function currentClock() {
+  return state.scenario?.clock_labels?.[state.selectedIndex] ?? '--:--';
+}
+
+function currentHealthValue() {
+  return state.scenario?.health_series?.values?.[state.selectedIndex] ?? 0;
+}
+
+function currentHealthStatus() {
+  return state.scenario?.health_series?.statuses?.[state.selectedIndex] ?? 'healthy';
+}
+
+function currentSignal() {
+  if (!state.scenario?.signal_series?.length) return null;
+  return getSignalById(state.activeSignalId) || state.scenario.signal_series[0];
+}
+
+function currentSignalPoint(signal) {
+  if (!signal) return { fault: null, baseline: null, z: null, centeredDiff: null };
+  return {
+    fault: signal.fault?.[state.selectedIndex] ?? null,
+    baseline: signal.baseline?.[state.selectedIndex] ?? null,
+    z: signal.z?.[state.selectedIndex] ?? null,
+    centeredDiff: signal.centered_diff?.[state.selectedIndex] ?? null,
+  };
+}
+
+function setView(view) {
+  state.activeView = view;
+  dom.dashboardView.classList.toggle('active', view === 'dashboard');
+  dom.explainabilityView.classList.toggle('active', view === 'explainability');
+  dom.navDashboard.classList.toggle('active', view === 'dashboard');
+  dom.navExplainability.classList.toggle('active', view === 'explainability');
+}
+
+function phaseInfo(scenario, minute) {
+  const siMinute = scenario.headline.si_warning?.minute ?? 0;
+  const conventionalMinute = scenario.headline.conventional_detection?.minute ?? scenario.minutes.at(-1) ?? 0;
+  const escalationMinute = scenario.headline.fault_consequence_escalation?.minute ?? scenario.minutes.at(-1) ?? conventionalMinute;
+
+  if (minute < siMinute) {
+    return { label: 'Observing', badgeClass: 'healthy' };
+  }
+  if (minute < conventionalMinute) {
+    return { label: 'SI warning active', badgeClass: 'healthy' };
+  }
+  if (minute < escalationMinute) {
+    return { label: 'Conventional visible', badgeClass: 'warning' };
+  }
+  return { label: 'Escalated', badgeClass: 'critical' };
+}
+
+function buildMiniCard(label, value, note, valueClass = 'white') {
+  return `
+    <div class="mini-card">
+      <div class="mini-label">${label}</div>
+      <div class="mini-value ${valueClass}">${value}</div>
+      <div class="mini-note">${note}</div>
+    </div>
+  `;
+}
+
+function renderChrome() {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const rootCause = scenario.overview.root_cause;
+  const manifestation = scenario.overview.earliest_manifestation;
+  const activeSignal = currentSignal();
+  const activePoint = currentSignalPoint(activeSignal);
+  const health = currentHealthValue();
+  const healthStatus = currentHealthStatus();
+  const phase = phaseInfo(scenario, currentMinute());
+
+  dom.scenarioTitle.textContent = `${scenario.display_name}`;
+  dom.subbarHealth.textContent = formatHealth(health);
+  dom.subbarStatus.textContent = healthStatus.toUpperCase();
+  dom.subbarStatus.className = `status-pill ${statusClass(healthStatus)}`;
+  dom.rootNodeChip.textContent = `Root: ${rootCause.root_node}`;
+
+  dom.overlayPhase.textContent = phase.label;
+  dom.overlayPhase.className = `mini-badge ${statusClass(phase.badgeClass)}`;
+  dom.panel1Badge.textContent = healthStatus.toUpperCase();
+  dom.panel3Badge.textContent = niceSignalLabel(activeSignal?.signal_id);
+  dom.panel4Badge.textContent = rootCause.confidence || 'ranked';
+  dom.explainWindowMeta.textContent = `${currentClock()} · ${rootCause.root_node} · ${rootCause.display_name}`;
+
+  const cards = [
+    buildMiniCard('Structural Health Index', formatHealth(health), 'SI warning active before conventional detection', 'white'),
+    buildMiniCard('Lead vs Conventional', `${scenario.lead_vs_conventional ?? '--'} min`, scenario.claim_copy, 'green'),
+    buildMiniCard('Root Node', rootCause.root_node, rootCause.display_name, 'white'),
+    buildMiniCard('Conventional Marker', scenario.headline.conventional_detection?.timestamp_clock ?? '--:--', scenario.headline.conventional_detection?.signal_display_name ?? '--', 'amber'),
+    buildMiniCard('Selected Time', currentClock(), `${activeSignal?.display_name ?? '--'} z ${formatMaybe(activePoint.z, 2)}`, 'white'),
+    buildMiniCard('SI Warning', scenario.headline.si_warning?.timestamp_clock ?? '--:--', scenario.headline.si_warning?.signal_display_name ?? '--', 'green'),
+    buildMiniCard('Conventional Detection', scenario.headline.conventional_detection?.timestamp_clock ?? '--:--', scenario.headline.conventional_detection?.signal_display_name ?? '--', 'amber'),
+    buildMiniCard('Traditional FDD', scenario.headline.traditional_fdd?.timestamp_clock ?? '--:--', scenario.headline.traditional_fdd?.signal_display_name ?? 'Not available', 'white'),
+    buildMiniCard('Lead Window', `${scenario.lead_time_minutes ?? '--'} min`, scenario.lead_time_status.replaceAll('_', ' '), 'green'),
+    buildMiniCard('Primary Manifestation', manifestation.node ?? '--', `Earliest manifestation at minute ${manifestation.first_sustained_minute ?? '--'}`, 'red'),
+  ];
+  dom.findingsRail.innerHTML = cards.join('');
+
+  renderDetectionRibbon();
+}
+
+function renderDetectionRibbon() {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const minutes = scenario.minutes;
+  const minMinute = minutes[0];
+  const maxMinute = minutes[minutes.length - 1];
+  const span = Math.max(maxMinute - minMinute, 1);
+
+  const siMinute = scenario.headline.si_warning?.minute ?? minMinute;
+  const conventionalMinute = scenario.headline.conventional_detection?.minute ?? maxMinute;
+  const escalationMinute = scenario.headline.fault_consequence_escalation?.minute ?? maxMinute;
+  const current = currentMinute();
+
+  const siLeft = ((siMinute - minMinute) / span) * 100;
+  const conventionalLeft = ((conventionalMinute - minMinute) / span) * 100;
+  const escalationLeft = ((escalationMinute - minMinute) / span) * 100;
+  const currentLeft = ((current - minMinute) / span) * 100;
+
+  dom.detectionTrack.innerHTML = `
+    <div class="detection-segment green" style="left:${siLeft}%; width:${Math.max(conventionalLeft - siLeft, 8)}%;">
+      EARLY DETECTION · ${scenario.lead_vs_conventional ?? '--'} min earlier
+    </div>
+    <div class="detection-segment amber" style="left:${conventionalLeft}%; width:${Math.max(100 - conventionalLeft, 10)}%;">
+      <span>CONVENTIONAL</span>
+      <span>ALARM TRIGGERED</span>
+    </div>
+    <div class="detection-marker" style="left:${siLeft}%;"></div>
+    <div class="detection-marker" style="left:${conventionalLeft}%;"></div>
+    <div class="detection-marker" style="left:${escalationLeft}%; background:rgba(255,94,103,0.9);"></div>
+    <div class="detection-caret" style="left:${currentLeft}%;">▼</div>
+  `;
+}
+
+function linePath(values, width, height, padding = 12, yMin = null, yMax = null) {
+  const cleanValues = values.map((value) => Number(value ?? 0));
+  const min = yMin ?? Math.min(...cleanValues);
+  const max = yMax ?? Math.max(...cleanValues);
+  const range = Math.max(max - min, 1e-6);
+  return cleanValues.map((value, index) => {
+    const x = padding + (index / Math.max(cleanValues.length - 1, 1)) * (width - padding * 2);
+    const y = height - padding - ((value - min) / range) * (height - padding * 2);
+    return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+  }).join(' ');
+}
+
+function verticalLine(x, height) {
+  return `<line x1="${x}" y1="12" x2="${x}" y2="${height - 12}" stroke="rgba(221,233,247,0.24)" stroke-dasharray="5 5"></line>`;
+}
+
+function markerX(index, count, width, padding = 12) {
+  return padding + (index / Math.max(count - 1, 1)) * (width - padding * 2);
+}
+
+function syncFindingsRailHeight() {
+  if (!dom.findingsRail || !dom.fridgeStage) return;
+  window.requestAnimationFrame(() => {
+    const overlayHead = dom.fridgeStage.previousElementSibling?.offsetHeight || 0;
+    const stageHeight = dom.fridgeStage.clientHeight || 0;
+    if (stageHeight > 0) {
+      dom.findingsRail.style.maxHeight = `${overlayHead + stageHeight}px`;
+    }
+  });
+}
+
+function renderHealthPanel() {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const health = currentHealthValue();
+  const healthStatus = currentHealthStatus();
+  const root = scenario.overview.root_cause;
+  const activeSignal = currentSignal();
+  const activePoint = currentSignalPoint(activeSignal);
+  const conventional = scenario.headline.conventional_detection;
+
+  dom.healthGaugeValue.textContent = formatMaybe(health * 100, 1);
+  dom.healthMetricGrid.innerHTML = `
+    <div class="metric-box">
+      <div class="label">Selected Status</div>
+      <div class="value" style="color:${healthStatus === 'critical' ? 'var(--red)' : healthStatus === 'warning' ? 'var(--amber)' : 'var(--green)'}">${healthStatus.toUpperCase()}</div>
+    </div>
+    <div class="metric-box">
+      <div class="label">Lead vs Conventional</div>
+      <div class="value">${scenario.lead_vs_conventional ?? '--'} min</div>
+    </div>
+    <div class="metric-box">
+      <div class="label">Root Cause</div>
+      <div class="value">${root.root_node}</div>
+    </div>
+    <div class="metric-box">
+      <div class="label">Active Signal</div>
+      <div class="value">${formatMaybe(activePoint.z, 2)} z</div>
+    </div>
+  `;
+
+  const width = 780;
+  const height = 182;
+  const values = scenario.health_series.values.map((value) => value * 100);
+  const path = linePath(values, width, height, 16, 0, 100);
+  const siIndex = findNearestIndex(scenario.minutes, scenario.headline.si_warning?.minute ?? scenario.minutes[0]);
+  const conventionalIndex = findNearestIndex(scenario.minutes, conventional?.minute ?? scenario.minutes.at(-1));
+  const currentX = markerX(state.selectedIndex, values.length, width, 16);
+  const siX = markerX(siIndex, values.length, width, 16);
+  const conventionalX = markerX(conventionalIndex, values.length, width, 16);
+
+  dom.healthChart.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="healthGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#46d76a"></stop>
+          <stop offset="48%" stop-color="#ffb020"></stop>
+          <stop offset="100%" stop-color="#ff5e67"></stop>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="${width}" height="${height}" fill="rgba(4,10,18,0.95)"></rect>
+      ${[20, 40, 60, 80].map((tick) => {
+        const y = height - 16 - ((tick - 0) / 100) * (height - 32);
+        return `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="rgba(23,40,66,0.8)" stroke-dasharray="4 5"></line>
+          <text x="${width - 12}" y="${y - 4}" text-anchor="end" fill="#6d86a3" font-size="10">${tick}</text>`;
+      }).join('')}
+      ${verticalLine(siX, height)}
+      ${verticalLine(conventionalX, height)}
+      <path d="${path}" fill="none" stroke="url(#healthGrad)" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"></path>
+      <line x1="${currentX}" y1="10" x2="${currentX}" y2="${height - 10}" stroke="#68dfff" stroke-width="2"></line>
+      <circle cx="${currentX}" cy="${height - 16 - ((values[state.selectedIndex] - 0) / 100) * (height - 32)}" r="5" fill="#68dfff" stroke="#dfeffc" stroke-width="1.5"></circle>
+      <text x="${siX + 6}" y="22" fill="#38d15d" font-size="10">SI</text>
+      <text x="${conventionalX + 6}" y="22" fill="#ffb020" font-size="10">CONV</text>
+    </svg>
+  `;
+}
+
+function zToColor(z) {
+  if (z === null || z === undefined) return 'rgba(22,38,61,0.12)';
+  if (z >= 2.5) return 'rgba(255,94,103,0.44)';
+  if (z >= 1.2) return 'rgba(255,176,32,0.34)';
+  if (z <= -2.5) return 'rgba(72,153,255,0.42)';
+  if (z <= -1.2) return 'rgba(104,223,255,0.3)';
+  return 'rgba(31,53,83,0.18)';
+}
+
+function renderOverlay() {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const activeSignal = currentSignal();
+  const activePoint = currentSignalPoint(activeSignal);
+  const root = scenario.overview.root_cause;
+  const phase = phaseInfo(scenario, currentMinute());
+  const grid = scenario.grid;
+  const cellWidth = grid.area.width / grid.cols;
+  const cellHeight = grid.area.height / grid.rows;
+
+  dom.overlayRootNode.textContent = root.root_node;
+  dom.overlayRootText.textContent = root.display_name;
+  dom.overlayClock.textContent = currentClock();
+  dom.timeLabel.textContent = currentClock();
+  dom.activeSignalBadge.textContent = `Signal: ${activeSignal?.display_name ?? '--'}`;
+
+  const zFrame = grid.z_frames[state.selectedIndex] || [];
+  dom.gridLayer.innerHTML = zFrame.map((value, index) => {
+    const row = Math.floor(index / grid.cols);
+    const col = index % grid.cols;
+    return `
+      <div class="grid-cell" style="
+        left:${grid.area.left + col * cellWidth}%;
+        top:${grid.area.top + row * cellHeight}%;
+        width:${cellWidth}%;
+        height:${cellHeight}%;
+        background:${zToColor(value)};
+      "></div>
+    `;
+  }).join('');
+
+  const activeComponent = activeSignal?.component;
+  const zones = scenario.overlay.zones;
+  const visibleZones = [];
+  if (zones[root.root_node]) {
+    visibleZones.push([root.root_node, zones[root.root_node], 'root']);
+  }
+  if (activeComponent && activeComponent !== root.root_node && zones[activeComponent]) {
+    visibleZones.push([activeComponent, zones[activeComponent], 'active']);
+  }
+  dom.zoneLayer.innerHTML = visibleZones.map(([key, zone, type]) => {
+    const classes = [
+      'zone-box',
+      type,
+    ].filter(Boolean).join(' ');
+    return `
+      <div class="${classes}" style="
+        left:${zone.left}%;
+        top:${zone.top}%;
+        width:${zone.width}%;
+        height:${zone.height}%;
+      "></div>
+    `;
+  }).join('');
+
+  dom.markerLayer.innerHTML = scenario.signal_series.map((signal) => {
+    const marker = signal.marker || {};
+    const point = currentSignalPoint(signal);
+    const isActive = signal.signal_id === activeSignal?.signal_id;
+    return `
+      <button
+        class="sensor-marker ${isActive ? 'active' : ''}"
+        data-signal-id="${signal.signal_id}"
+        style="left:${marker.x || 50}%; top:${marker.y || 50}%;"
+        title="${signal.display_name} (${formatMaybe(point.z, 2)} z)"
+      ></button>
+    `;
+  }).join('');
+
+  dom.markerLayer.querySelectorAll('.sensor-marker').forEach((marker) => {
+    marker.addEventListener('click', () => {
+      state.activeSignalId = marker.dataset.signalId;
+      renderScenario();
+    });
+  });
+
+  dom.sensorFocus.innerHTML = activeSignal ? `
+    <div class="sensor-focus-main">
+      <div class="label">Selected sensor</div>
+      <div class="name">${activeSignal.display_name}</div>
+      <div class="meta">
+        z ${formatMaybe(activePoint.z, 2)} · fault ${formatMaybe(activePoint.fault, 1)} ${activeSignal.unit || ''} · baseline ${formatMaybe(activePoint.baseline, 1)} ${activeSignal.unit || ''}
+      </div>
+    </div>
+    <div class="hint">Click another sensor dot to switch.</div>
+  ` : `
+    <div class="sensor-focus-main">
+      <div class="label">Selected sensor</div>
+      <div class="name">No active signal</div>
+    </div>
+  `;
+
+  syncFindingsRailHeight();
+  renderTimeline(dom.dashboardTimeline, currentMinute(), true);
+}
+
+function renderTimeline(target, currentMinuteValue, compact = false) {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const minutes = scenario.minutes;
+  const minMinute = minutes[0];
+  const maxMinute = minutes[minutes.length - 1];
+  const span = Math.max(maxMinute - minMinute, 1);
+
+  const events = [
+    { key: 'si_warning', label: 'SI', className: 'si', minute: scenario.headline.si_warning?.minute, clock: scenario.headline.si_warning?.timestamp_clock },
+    { key: 'traditional_fdd', label: 'TRAD', className: 'traditional', minute: scenario.headline.traditional_fdd?.minute, clock: scenario.headline.traditional_fdd?.timestamp_clock },
+    { key: 'conventional_detection', label: 'CONV', className: 'conv', minute: scenario.headline.conventional_detection?.minute, clock: scenario.headline.conventional_detection?.timestamp_clock },
+    { key: 'fault_consequence_escalation', label: 'ESC', className: 'escalation', minute: scenario.headline.fault_consequence_escalation?.minute, clock: scenario.headline.fault_consequence_escalation?.timestamp_clock },
+  ].filter((item) => item.minute !== null && item.minute !== undefined);
+
+  const eventNodes = events.map((event) => {
+    const ratio = clamp((event.minute - minMinute) / span, 0, 1).toFixed(6);
+    const left = `calc(16px + ${ratio} * (100% - 32px))`;
+    return `
+      <div class="timeline-event ${event.className}" style="left:${left}">
+        <div>${event.label}</div>
+        <div>${event.clock}</div>
+      </div>
+    `;
+  }).join('');
+
+  const currentRatio = clamp((currentMinuteValue - minMinute) / span, 0, 1).toFixed(6);
+  const currentLeft = `calc(16px + ${currentRatio} * (100% - 32px))`;
+  target.innerHTML = `
+    <div class="timeline-line"></div>
+    ${eventNodes}
+    <div class="timeline-current" style="left:${currentLeft}">
+      <div>NOW</div>
+      <div>${currentClock()}</div>
+    </div>
+  `;
+}
+
+function renderSignalPanel() {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const rows = scenario.signal_series.map((signal) => {
+    const z = signal.z?.[state.selectedIndex] ?? 0;
+    return { signal, z, absZ: Math.abs(Number(z || 0)) };
+  }).sort((a, b) => b.absZ - a.absZ).slice(0, 8);
+
+  dom.signalBars.innerHTML = rows.map(({ signal, z, absZ }) => {
+    const width = clamp((absZ / 4.5) * 100, 4, 100);
+    const klass = severityClass(absZ);
+    const category = absZ >= 2.5 ? 'Anomaly' : absZ >= 1.5 ? 'Elevated' : 'Nominal';
+    return `
+      <div class="signal-row">
+        <div class="signal-top">
+          <span>${signal.display_name}</span>
+          <span>${formatMaybe(z, 2)} z · ${category}</span>
+        </div>
+        <div class="signal-track">
+          <div class="signal-fill ${klass}" style="width:${width}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderCorridorPanel() {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const root = scenario.overview.root_cause;
+  const manifestation = scenario.overview.earliest_manifestation;
+  const rankings = scenario.overview.component_rankings || [];
+  const maxScore = Math.max(...rankings.map((item) => item.score || 0), 1);
+
+  dom.benchmarkChips.innerHTML = `
+    <span class="benchmark-chip">SI ${scenario.headline.si_warning?.timestamp_clock ?? '--:--'}</span>
+    <span class="benchmark-chip">Conv ${scenario.headline.conventional_detection?.timestamp_clock ?? '--:--'}</span>
+    <span class="benchmark-chip">Trad ${scenario.headline.traditional_fdd?.timestamp_clock ?? '--:--'}</span>
+    <span class="benchmark-chip">Lead ${scenario.lead_vs_conventional ?? '--'} min</span>
+  `;
+
+  dom.corridorSummary.innerHTML = `
+    <div class="label">Primary corridor</div>
+    <div class="value">${root.display_name}</div>
+    <div style="margin-top:8px;color:#8da4bf;font-size:12px;line-height:1.55;">${root.explanation}</div>
+    <div class="corridor-meta" style="margin-top:8px;">
+      <span>Manifestation ${manifestation.node ?? '--'}</span>
+      <span>First support ${root.first_supported_minute ?? '--'} min</span>
+      <span>Confidence ${root.confidence ?? '--'}</span>
+    </div>
+  `;
+
+  dom.corridorList.innerHTML = rankings.slice(0, 4).map((item) => `
+    <div class="corridor-row">
+      <div class="corridor-top">
+        <span>${item.display_name}</span>
+        <span>${formatMaybe(item.score, 1)} score</span>
+      </div>
+      <div class="corridor-track">
+        <div class="corridor-fill ${item.confidence === 'high' ? 'sev-anomaly' : item.confidence === 'medium' ? 'sev-elevated' : 'sev-normal'}" style="width:${(item.score / maxScore) * 100}%"></div>
+      </div>
+      <div class="corridor-meta">
+        <span>${item.root_node}</span>
+        <span>${item.confidence}</span>
+        <span>${item.support_count} signals</span>
+        <span>${item.lead_vs_alarm_min ?? '--'} min lead</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderExplainability() {
+  const scenario = state.scenario;
+  if (!scenario) return;
+
+  const entries = scenario.audit_entries || [];
+  if (!entries.length) {
+    dom.auditFeed.innerHTML = '<div class="empty-state">No audit entries available.</div>';
+    dom.auditFocus.innerHTML = '<div class="empty-state">No selected audit entry.</div>';
+    dom.explainChart.innerHTML = '';
+    dom.evidenceTable.innerHTML = '';
+    dom.evidenceFootnote.textContent = '';
+    return;
+  }
+
+  state.activeAuditIndex = nearestAuditIndex(entries, currentMinute());
+  const activeEntry = entries[state.activeAuditIndex];
+
+  renderTimeline(dom.explainTimeline, activeEntry.timestamp_minute);
+
+  dom.auditFeed.innerHTML = entries.map((entry, index) => `
+    <div class="audit-card ${index === state.activeAuditIndex ? 'active' : ''}" data-audit-index="${index}">
+      <div class="audit-top">
+        <span class="audit-time">${entry.timestamp_clock}</span>
+        <span class="audit-lead">${entry.lead_vs_conventional_minutes !== null && entry.lead_vs_conventional_minutes !== undefined ? `${entry.lead_vs_conventional_minutes} min lead` : 'diagnosis'}</span>
+      </div>
+      <p>${entry.narrative}</p>
+      <div class="audit-meta">
+        <span class="timeline-badge">${entry.primary_root_node}</span>
+        <span class="timeline-badge">${entry.likely_fault}</span>
+      </div>
+    </div>
+  `).join('');
+
+  dom.auditFeed.querySelectorAll('.audit-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const nextIndex = Number(card.dataset.auditIndex);
+      const minute = entries[nextIndex].timestamp_minute;
+      state.activeAuditIndex = nextIndex;
+      state.selectedIndex = findNearestIndex(scenario.minutes, minute);
+      const nextSignalId = entries[nextIndex].evidence_signals?.[0]?.signal_id;
+      if (nextSignalId) state.activeSignalId = nextSignalId;
+      renderScenario();
+      setView('explainability');
+    });
+  });
+
+  dom.auditFocus.innerHTML = `
+    <h3>${activeEntry.timestamp_clock} · ${activeEntry.primary_root_node} · ${activeEntry.likely_fault}</h3>
+    <div style="color:#c9d8ea;font-size:13px;line-height:1.65;">${activeEntry.narrative}</div>
+    <div class="focus-grid">
+      <div class="metric-box">
+        <div class="label">Root node</div>
+        <div class="value">${activeEntry.primary_root_node}</div>
+      </div>
+      <div class="metric-box">
+        <div class="label">Conventional marker</div>
+        <div class="value">${activeEntry.conventional_benchmark_minute !== null && activeEntry.conventional_benchmark_minute !== undefined ? activeEntry.conventional_benchmark_label : '--'}</div>
+      </div>
+      <div class="metric-box">
+        <div class="label">Lead vs conventional</div>
+        <div class="value">${activeEntry.lead_vs_conventional_minutes !== null && activeEntry.lead_vs_conventional_minutes !== undefined ? `${activeEntry.lead_vs_conventional_minutes} min` : '--'}</div>
+      </div>
+      <div class="metric-box">
+        <div class="label">Direct alarm</div>
+        <div class="value">${activeEntry.direct_alarm_signal ?? '--'}</div>
+      </div>
+    </div>
+    <div class="metric-box">
+      <div class="label">Why system health drops</div>
+      <div class="value" style="font-size:14px;line-height:1.65;font-weight:500;">${activeEntry.why_it_matters}</div>
+    </div>
+  `;
+
+  const evidenceRows = activeEntry.evidence_signals || [];
+  dom.evidenceTable.innerHTML = evidenceRows.map((signal) => `
+    <tr>
+      <td>${signal.display_name}</td>
+      <td>${formatMaybe(signal.fault_value, 2)}</td>
+      <td>${formatMaybe(signal.baseline_value, 2)}</td>
+      <td>${formatMaybe(signal.z_score, 2)}</td>
+    </tr>
+  `).join('');
+
+  dom.evidenceFootnote.innerHTML = `
+    Components to inspect: ${activeEntry.components_to_check.join(', ')}<br>
+    Secondary affected nodes: ${(activeEntry.secondary_affected_nodes || []).join(', ') || '--'}
+  `;
+
+  const chartSignalId = evidenceRows[0]?.signal_id;
+  const signalSeries = getSignalById(chartSignalId);
+  if (!signalSeries) {
+    dom.explainChart.innerHTML = '<div class="empty-state">No signal series available for this audit event.</div>';
+    return;
+  }
+
+  const currentIdx = findNearestIndex(scenario.minutes, activeEntry.timestamp_minute);
+  const start = Math.max(0, currentIdx - 120);
+  const end = Math.min(scenario.minutes.length - 1, currentIdx + 120);
+  const sliceFault = signalSeries.fault.slice(start, end + 1).map((value) => Number(value ?? 0));
+  const sliceBaseline = signalSeries.baseline.slice(start, end + 1).map((value) => Number(value ?? 0));
+  const minY = Math.min(...sliceFault, ...sliceBaseline);
+  const maxY = Math.max(...sliceFault, ...sliceBaseline);
+  const width = 860;
+  const height = 220;
+  const faultPath = linePath(sliceFault, width, height, 16, minY, maxY);
+  const baselinePath = linePath(sliceBaseline, width, height, 16, minY, maxY);
+  const eventX = markerX(currentIdx - start, sliceFault.length, width, 16);
+
+  dom.explainChart.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+      <rect x="0" y="0" width="${width}" height="${height}" fill="rgba(4,10,18,0.95)"></rect>
+      ${[0.25, 0.5, 0.75].map((ratio) => {
+        const y = 16 + ratio * (height - 32);
+        return `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="rgba(23,40,66,0.85)" stroke-dasharray="4 5"></line>`;
+      }).join('')}
+      <path d="${baselinePath}" fill="none" stroke="#4d82ff" stroke-width="2.2"></path>
+      <path d="${faultPath}" fill="none" stroke="#ffb020" stroke-width="2.8"></path>
+      <line x1="${eventX}" y1="12" x2="${eventX}" y2="${height - 12}" stroke="#68dfff" stroke-width="2" stroke-dasharray="5 4"></line>
+      <text x="${eventX + 8}" y="24" fill="#68dfff" font-size="10">AUDIT ${activeEntry.timestamp_clock}</text>
+      <text x="18" y="22" fill="#4d82ff" font-size="10">Baseline</text>
+      <text x="90" y="22" fill="#ffb020" font-size="10">Fault</text>
+      <text x="${width - 14}" y="${height - 12}" text-anchor="end" fill="#6d86a3" font-size="10">${signalSeries.display_name}</text>
+    </svg>
+  `;
+}
+
+function renderScenario() {
+  if (!state.scenario) return;
+  dom.timeSlider.value = String(state.selectedIndex);
+  renderChrome();
+  renderHealthPanel();
+  renderOverlay();
+  renderSignalPanel();
+  renderCorridorPanel();
+  renderExplainability();
+}
+
+async function loadScenario(scenarioId) {
+  state.scenario = await fetchJson(
+    `${APP_CONFIG.scenarioBasePath}${encodeURIComponent(scenarioId)}${APP_CONFIG.scenarioSuffix || ''}`
+  );
+  state.scenarioId = scenarioId;
+  state.selectedIndex = state.scenario.default_index || 0;
+  state.activeAuditIndex = 0;
+  state.activeSignalId = state.scenario.headline.si_warning?.signal_id || state.scenario.signal_series?.[0]?.signal_id || null;
+  dom.timeSlider.max = String(Math.max(state.scenario.minutes.length - 1, 0));
+  renderScenario();
+}
+
+function startPlayback() {
+  if (state.timer) window.clearInterval(state.timer);
+  state.timer = window.setInterval(() => {
+    if (!state.playing || !state.scenario) return;
+    state.selectedIndex = (state.selectedIndex + 2) % state.scenario.minutes.length;
+    renderScenario();
+  }, 900);
+}
+
+function bindControls() {
+  [dom.navDashboard, dom.navExplainability].forEach((button) => {
+    button.addEventListener('click', () => setView(button.dataset.view));
+  });
+
+  dom.fridgeAsset.addEventListener('load', syncFindingsRailHeight);
+
+  dom.jumpExplainability.addEventListener('click', () => setView('explainability'));
+
+  dom.scenarioSelect.addEventListener('change', async (event) => {
+    await loadScenario(event.target.value);
+  });
+
+  dom.playToggle.addEventListener('click', () => {
+    state.playing = !state.playing;
+    dom.playToggle.textContent = state.playing ? 'Pause autoplay' : 'Resume autoplay';
+  });
+
+  dom.prevMinute.addEventListener('click', () => {
+    if (!state.scenario) return;
+    state.selectedIndex = Math.max(0, state.selectedIndex - 5);
+    renderScenario();
+  });
+
+  dom.nextMinute.addEventListener('click', () => {
+    if (!state.scenario) return;
+    state.selectedIndex = Math.min(state.scenario.minutes.length - 1, state.selectedIndex + 5);
+    renderScenario();
+  });
+
+  dom.timeSlider.addEventListener('input', (event) => {
+    state.selectedIndex = Number(event.target.value);
+    renderScenario();
+  });
+
+  window.addEventListener('resize', syncFindingsRailHeight);
+}
+
+async function init() {
+  try {
+    state.bootstrap = await fetchJson(APP_CONFIG.bootstrapUrl);
+    dom.appTitle.textContent = state.bootstrap.app_title || 'ColdGrid Structural Intelligence Demo';
+    dom.fridgeAsset.src = state.bootstrap.asset_url;
+    dom.scenarioSelect.innerHTML = state.bootstrap.scenarios.map((scenario) => `
+      <option value="${scenario.scenario_id}">${scenario.display_name} · ${scenario.lead_vs_conventional ?? '--'} min lead</option>
+    `).join('');
+    dom.scenarioSelect.value = state.bootstrap.default_scenario_id;
+    bindControls();
+    await loadScenario(state.bootstrap.default_scenario_id);
+    startPlayback();
+  } catch (error) {
+    console.error(error);
+    document.body.innerHTML = `<div class="empty-state">Unable to load Demo4 dashboard.<br>${String(error)}</div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
